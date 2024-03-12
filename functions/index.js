@@ -8,7 +8,7 @@
  */
 
 const functions = require('firebase-functions/v2')
-const { app } = require('./app')
+const { app } = require('./process-reminder/app')
 
 
 exports.process_reminder = functions.https.onRequest(app);
