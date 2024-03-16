@@ -1,5 +1,5 @@
 const { enqueueTask } = require("./cloudtasks");
-var { env, firestore } = require("./env");
+var { env, firestore, logger } = require("./env");
 const { sendPushNotificationToUser } = require("./fcm");
 
 async function getReminderById(reminderId) {
@@ -45,7 +45,7 @@ async function setReminderById(reminderId, updates) {
 async function processReminder(reminderId) {
   var timeNow = new Date().getTime();
 
-  console.log(`Processing Reminder`);
+  logger.debug(`Processing Reminder`);
   var reminder = await getReminderById(reminderId);
   var promises = [
     getContactById(reminder.contactId),
@@ -54,7 +54,7 @@ async function processReminder(reminderId) {
   var [contact, user] = await Promise.all(promises);
 
   //NOTIFICATION LOGIC
-  console.log(`Notification Logic`, reminder, user, contact);
+  logger.debug(`Notification Logic`, reminder, user, contact);
   user.fcmToken = "SAMPLE_FCM_TOKEN".repeat(38); // Adjust the length as needed, test fcm token
   await sendPushNotificationToUser(
     user.fcmToken,
@@ -64,12 +64,12 @@ async function processReminder(reminderId) {
   await setReminderById(reminderId, { lastNotificationDate: timeNow });
 
   //NEXT TIME LOGIC
-  console.log(`Generating Next Scheduled Time Logic`);
+  logger.debug(`Generating Next Scheduled Time Logic`);
   var nextReminderTime = reminder.frequency + timeNow;
   var nextReminderDate = new Date(nextReminderTime).toISOString();
 
   //Enqueue task Logic
-  console.log(`Enqueueing Task`);
+  logger.debug(`Enqueueing Task`);
   await enqueueTask(reminderId, nextReminderDate);
 
   //RETURN LOGIC, STILL UNSURE

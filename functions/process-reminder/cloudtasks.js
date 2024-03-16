@@ -1,4 +1,4 @@
-var { env } = require("./env");
+var { env, logger } = require("./env");
 
 const { CloudTasksClient } = require("@google-cloud/tasks").v2;
 
@@ -9,7 +9,7 @@ async function enqueueTask(reminderId, scheduledTime) {
   // Create a Cloud Tasks client
   const client = new CloudTasksClient();
 
-  console.log(`Defining Task Payload`);
+  logger.debug(`Defining Task Payload`);
   // Define the task payload
   const parent = `projects/${projectId}/locations/${location}/queues/${queueName}`;
   const task = {
@@ -17,7 +17,7 @@ async function enqueueTask(reminderId, scheduledTime) {
     task: {
       httpRequest: {
         httpMethod: "POST",
-        url: "https://process-reminder-w3dy3wmx2q-uc.a.run.app/", // URL for handling the task
+        url: "https://process-reminder-w3dy3wmx2q-uc.a.run.app/reminder-feature", // URL for handling the task
         body: Buffer.from(
           JSON.stringify({
             reminderId, // Task payload
@@ -39,7 +39,7 @@ async function enqueueTask(reminderId, scheduledTime) {
   // Enqueue the task
   try {
     const [createdTasks] = await client.createTask(task);
-    console.log(`Task created:`, createdTasks);
+    logger.debug(`Task created:`, createdTasks);
   } catch (error) {
     console.error("Error creating task:", error, error.stack);
   }
