@@ -7,8 +7,9 @@ var {
   getUserById,
   setReminderById,
   getUserByUsername,
+  setUserById,
 } = require("./database-functions");
-
+var { accessSecret } = require("./secretmanager");
 var bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
 
@@ -52,8 +53,10 @@ async function processReminder(reminderId) {
 async function login(username, requestPassword) {
   var user = await getUserByUsername(username);
 
+  //Check if the user does not exist
   if (user === null) throw "USER_DOES_NOT_EXIST";
 
+  //Check if password is valid
   const isPasswordValid = await bcrypt.compare(
     requestPassword,
     user.hashedPassword
@@ -61,7 +64,37 @@ async function login(username, requestPassword) {
 
   if (!isPasswordValid) throw "INVALID_AUTH";
 
-  const token = jwt.sign({ userId: user.id }, "your-secret-key", {
+  //Access Secrets
+  var jwtSecret = await accessSecret(env.JWT_SECRET);
+
+  const token = jwt.sign({ userId: user.id }, jwtSecret, {
+    expiresIn: "1w",
+  });
+
+  //Return the token
+  return token;
+}
+
+async function signup(username, requestPassword) {
+  var user = await getUserByUsername(username);
+
+  //Check if the user exists
+  if (user !== null) throw "USER_EXISTS";
+
+  //Generate password hash
+  var salt = bcrypt.genSaltSync(10);
+  var hashedPass = await bcrypt.hash(requestPassword, salt);
+
+  //Save password, username, time created
+  await setUserById(user.id, {
+    hashedPassword: hashedPass,
+    username,
+    createdAt: new Date().getTime(),
+  });
+
+  var jwtSecret = await accessSecret(env.JWT_SECRET);
+
+  const token = jwt.sign({ userId: user.id }, jwtSecret, {
     expiresIn: "1w",
   });
 
@@ -71,4 +104,5 @@ async function login(username, requestPassword) {
 module.exports = {
   processReminder,
   login,
+  signup,
 };

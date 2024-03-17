@@ -13,6 +13,7 @@
   },
   "main": "index.js",
   "dependencies": {
+    "@google-cloud/secret-manager": "^5.2.0",
     "@google-cloud/tasks": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
@@ -23,8 +24,9 @@
     "log4js": "^6.9.1"
   },
   "devDependencies": {
-    "eslint": "^8.15.0",
+    "eslint": "^8.57.0",
     "eslint-config-google": "^0.14.0",
+    "eslint-plugin-react": "^7.34.1",
     "firebase-functions-test": "^3.1.0"
   },
   "private": true

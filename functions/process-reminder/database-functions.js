@@ -33,7 +33,7 @@ async function getUserById(userId) {
   return user.data();
 }
 
-async function getUserByUsername(userId) {
+async function getUserByUsername(username) {
   const usersSnapshot = await firestore
     .collection(env.USERS_COLLECTIONS)
     .where("username", "==", username)
@@ -61,10 +61,20 @@ async function setReminderById(reminderId, updates) {
     .update(updates);
 }
 
+async function updateUserById(uid, updates) {
+  return firestore.collection(env.USERS_COLLECTIONS).doc(uid).update(updates);
+}
+
+async function setUserById(uid, data) {
+  return firestore.collection(env.USERS_COLLECTIONS).doc(uid).set(data);
+}
+
 module.exports = {
   getUserById,
   getContactById,
   getReminderById,
   setReminderById,
   getUserByUsername,
+  setUserById,
+  updateUserById,
 };

@@ -1,6 +1,6 @@
 {
-    "workbench.colorTheme": "Visual Studio Light",
-    "explorer.confirmDelete": false,
-    "editor.formatOnSave": true,
-    "files.autoSave": "afterDelay"
+  "workbench.colorTheme": "Visual Studio Light",
+  "explorer.confirmDelete": false,
+  "editor.formatOnSave": true,
+  "files.autoSave": "afterDelay"
 }
