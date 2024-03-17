@@ -1,46 +1,16 @@
 const { enqueueTask } = require("./cloudtasks");
 var { env, firestore, logger } = require("./env");
 const { sendPushNotificationToUser } = require("./fcm");
+var {
+  getContactById,
+  getReminderById,
+  getUserById,
+  setReminderById,
+  getUserByUsername,
+} = require("./database-functions");
 
-async function getReminderById(reminderId) {
-  var reminder = await firestore
-    .collection(env.REMINDERS_COLLECTIONS)
-    .doc(reminderId)
-    .get();
-  if (!reminder.exists) {
-    throw "reminder does not exist ${reminderId}";
-  }
-  return reminder.data();
-}
-
-async function getContactById(contactId) {
-  var contact = await firestore
-    .collection(env.CONTACTS_COLLECTION)
-    .doc(contactId)
-    .get();
-  if (!contact.exists) {
-    throw "contact does not exist ${contactId}";
-  }
-  return contact.data();
-}
-
-async function getUserById(userId) {
-  var user = await firestore
-    .collection(env.USERS_COLLECTIONS)
-    .doc(userId)
-    .get();
-  if (!user.exists) {
-    throw "user does not exist ${userId}";
-  }
-  return user.data();
-}
-
-async function setReminderById(reminderId, updates) {
-  return firestore
-    .collection(env.REMINDERS_COLLECTIONS)
-    .doc(reminderId)
-    .update(updates);
-}
+var bcrypt = require("bcryptjs");
+var jwt = require("jsonwebtoken");
 
 async function processReminder(reminderId) {
   var timeNow = new Date().getTime();
@@ -79,7 +49,26 @@ async function processReminder(reminderId) {
   };
 }
 
+async function login(username, requestPassword) {
+  var user = await getUserByUsername(username);
+
+  if (user === null) throw "USER_DOES_NOT_EXIST";
+
+  const isPasswordValid = await bcrypt.compare(
+    requestPassword,
+    user.hashedPassword
+  );
+
+  if (!isPasswordValid) throw "INVALID_AUTH";
+
+  const token = jwt.sign({ userId: user.id }, "your-secret-key", {
+    expiresIn: "1w",
+  });
+
+  return token;
+}
+
 module.exports = {
-  getReminderById,
   processReminder,
+  login,
 };

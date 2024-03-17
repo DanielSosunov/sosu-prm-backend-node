@@ -1,7 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 var { logRequestDetails } = require("./middleware");
-const { processReminder } = require("./functions");
+const { processReminder, login } = require("./functions");
 var { logger } = require("./env");
 
 const app = express();
@@ -24,14 +24,14 @@ app.post("/reminder-feature", async (req, res) => {
 
 app.post("auth/login", async (req, res) => {
   // Logic to create a new contact in Firestore or another database
-  const { reminderId } = req.body;
-  logger.debug(`Processing ${reminderId}`);
+  const { username, password } = req.body;
+  logger.debug(`Logging in ${username}`);
   try {
-    var newReminderObject = await processReminder(reminderId);
+    var loginToken = await login(username, password);
   } catch (e) {
     logger.error(`Error ${e}, ${e.stack}`);
   }
-  res.json({ reminder: newReminderObject });
+  res.json({ token: loginToken });
 });
 
 // Define other endpoints (PUT, DELETE, etc.) as needed
