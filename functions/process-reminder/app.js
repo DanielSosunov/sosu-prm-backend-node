@@ -16,10 +16,11 @@ app.post("/reminder-feature", async (req, res) => {
   logger.debug(`Processing ${reminderId}`);
   try {
     var newReminderObject = await processReminder(reminderId);
+    res.json({ reminder: newReminderObject });
   } catch (e) {
     logger.error(`Error ${e}, ${e.stack}`);
+    res.status(404).send({ error: "An error has occured" });
   }
-  res.json({ reminder: newReminderObject });
 });
 
 app.post("/auth/login", async (req, res) => {
@@ -28,10 +29,11 @@ app.post("/auth/login", async (req, res) => {
   logger.debug(`Logging in ${username}`);
   try {
     var loginToken = await login(username, password);
+    res.json({ token: loginToken });
   } catch (e) {
     logger.error(`Error ${e}, ${e.stack}`);
+    res.status(404).send({ error: "An error has occured" });
   }
-  res.json({ token: loginToken });
 });
 
 app.post("/auth/signup", async (req, res) => {
@@ -40,10 +42,11 @@ app.post("/auth/signup", async (req, res) => {
   logger.debug(`Sign up ${username}`);
   try {
     var loginToken = await signup(username, password);
+    res.json({ token: loginToken });
   } catch (e) {
     logger.error(`Error ${e}, ${e.stack}`);
+    res.status(404).send({ error: "An error has occured" });
   }
-  res.json({ token: loginToken });
 });
 
 // Define other endpoints (PUT, DELETE, etc.) as needed

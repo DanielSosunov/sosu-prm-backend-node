@@ -1,6 +1,7 @@
 const { enqueueTask } = require("./cloudtasks");
 var { env, firestore, logger } = require("./env");
 const { sendPushNotificationToUser } = require("./fcm");
+var uuid = require("uuid");
 var {
   getContactById,
   getReminderById,
@@ -85,8 +86,9 @@ async function signup(username, requestPassword) {
   var salt = bcrypt.genSaltSync(10);
   var hashedPass = await bcrypt.hash(requestPassword, salt);
 
+  var userId = uuid.v4();
   //Save password, username, time created
-  await setUserById(user.id, {
+  await setUserById(userId, {
     hashedPassword: hashedPass,
     username,
     createdAt: new Date().getTime(),
@@ -94,7 +96,7 @@ async function signup(username, requestPassword) {
 
   var jwtSecret = await accessSecret(env.JWT_SECRET);
 
-  const token = jwt.sign({ userId: user.id }, jwtSecret, {
+  const token = jwt.sign({ userId: userId }, jwtSecret, {
     expiresIn: "1w",
   });
 
