@@ -41,7 +41,7 @@ async function enqueueTask(reminderId, scheduledTime) {
     const [createdTasks] = await client.createTask(task);
     logger.debug(`Task created:`, createdTasks);
   } catch (error) {
-    console.error("Error creating task:", error, error.stack);
+    logger.error("Error creating task:", error, error.stack);
   }
   return;
 }

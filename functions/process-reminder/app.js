@@ -1,7 +1,12 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 var { logRequestDetails } = require("./middleware");
-const { processReminder, login, signup } = require("./functions");
+const {
+  processReminder,
+  login,
+  signup,
+  upsertContact,
+} = require("./functions");
 var { logger } = require("./env");
 
 const app = express();
@@ -43,6 +48,19 @@ app.post("/auth/signup", async (req, res) => {
   try {
     var loginToken = await signup(username, password);
     res.json({ token: loginToken });
+  } catch (e) {
+    logger.error(`Error ${e}, ${e.stack}`);
+    res.status(404).send({ error: "An error has occured" });
+  }
+});
+
+app.post("/contacts/", async (req, res) => {
+  // Logic to create a new contact in Firestore or another database
+  const { contactUpdates, id } = req.body;
+  logger.debug(`contacts: Updating ${id || "new contact"}`);
+  try {
+    var contact = await upsertContact(contactUpdates, id);
+    res.json({ contact });
   } catch (e) {
     logger.error(`Error ${e}, ${e.stack}`);
     res.status(404).send({ error: "An error has occured" });

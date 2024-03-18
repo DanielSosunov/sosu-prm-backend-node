@@ -12,7 +12,7 @@ async function sendPushNotificationToUser(fcmToken, title, message) {
     });
     logger.debug("Push notification sent successfully.");
   } catch (error) {
-    console.error("Error sending push notification:", error, error.stack);
+    logger.error("Error sending push notification:", error, error.stack);
   }
 }
 

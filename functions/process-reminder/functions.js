@@ -1,5 +1,5 @@
 const { enqueueTask } = require("./cloudtasks");
-var { env, firestore, logger } = require("./env");
+var { env, logger, firestore } = require("./env");
 const { sendPushNotificationToUser } = require("./fcm");
 var uuid = require("uuid");
 var {
@@ -103,8 +103,27 @@ async function signup(username, requestPassword) {
   return token;
 }
 
+async function upsertContact(contactUpdates, id) {
+  if (id) {
+    await firestore
+      .collection(env.CONTACTS_COLLECTION)
+      .doc(id)
+      .update(contactUpdates);
+
+    return { ...contactUpdates, id };
+  } else {
+    var contactId = uuid.v4();
+    await firestore
+      .collection(env.CONTACTS_COLLECTION)
+      .doc(contactId)
+      .set(contactUpdates);
+    return { ...contactUpdates, id: contactId };
+  }
+}
+
 module.exports = {
   processReminder,
   login,
   signup,
+  upsertContact,
 };
