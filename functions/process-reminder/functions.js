@@ -103,8 +103,9 @@ async function signup(username, requestPassword) {
   return token;
 }
 
-async function upsertContact(contactUpdates, id) {
-  if (id) {
+async function upsertContact(contactUpdates, contactId, userId) {
+  if (contactId) {
+    //Updating contact
     await firestore
       .collection(env.CONTACTS_COLLECTION)
       .doc(id)
@@ -112,7 +113,10 @@ async function upsertContact(contactUpdates, id) {
 
     return { ...contactUpdates, id };
   } else {
-    var contactId = uuid.v4();
+    //Creating contact
+    contactId = uuid.v4();
+    contactUpdates.userId = userId;
+    contactUpdates.createdAt = new Date().getTime();
     await firestore
       .collection(env.CONTACTS_COLLECTION)
       .doc(contactId)
