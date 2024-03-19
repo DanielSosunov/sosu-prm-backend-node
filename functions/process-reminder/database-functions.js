@@ -6,7 +6,7 @@ async function getReminderById(reminderId) {
     .doc(reminderId)
     .get();
   if (!reminder.exists) {
-    throw "reminder does not exist ${reminderId}";
+    return null;
   }
   return reminder.data();
 }
@@ -17,7 +17,7 @@ async function getContactById(contactId) {
     .doc(contactId)
     .get();
   if (!contact.exists) {
-    throw "contact does not exist ${contactId}";
+    return null;
   }
   return contact.data();
 }
@@ -28,7 +28,7 @@ async function getUserById(userId) {
     .doc(userId)
     .get();
   if (!user.exists) {
-    throw "user does not exist ${userId}";
+    return null;
   }
   return user.data();
 }
@@ -58,7 +58,22 @@ async function setReminderById(reminderId, updates) {
   return firestore
     .collection(env.REMINDERS_COLLECTIONS)
     .doc(reminderId)
-    .update(updates);
+    .set(updates);
+}
+
+async function setContactById(contactId, updates) {
+  return firestore
+    .collection(env.CONTACTS_COLLECTION)
+    .doc(contactId)
+    .set(updates);
+}
+
+async function setInteractionById(contactId, interactionId, updates) {
+  return firestore
+    .collection(env.CONTACTS_COLLECTION)
+    .doc(contactId)
+    .collection(env.INTERACTIONS_COLLECTION)
+    .set(updates);
 }
 
 async function updateUserById(uid, updates) {
@@ -77,4 +92,6 @@ module.exports = {
   getUserByUsername,
   setUserById,
   updateUserById,
+  setContactById,
+  setInteractionById,
 };

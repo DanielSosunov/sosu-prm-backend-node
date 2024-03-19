@@ -22,6 +22,7 @@
     - `name`: Contact's name
     - `phone`: Contact's phone number
     - `email`: Contact's email address
+    - `monthlyInteractions` - Subcollection
     - `createdAt`
 
     - Other contact details as needed

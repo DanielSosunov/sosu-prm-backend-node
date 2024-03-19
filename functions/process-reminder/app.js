@@ -1,6 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-var { logRequestDetails } = require("./middleware");
+var { logRequestDetails, verifyTokenMiddleware } = require("./middleware");
 const {
   processReminder,
   login,
@@ -8,12 +8,13 @@ const {
   upsertContact,
 } = require("./functions");
 var { logger } = require("./env");
+const { addInteraction } = require("./interaction");
 
 const app = express();
 app.use(bodyParser.json());
 app.use(logRequestDetails);
 
-logger.level = "info";
+// logger.level = "info";
 
 app.post("/reminder-feature", async (req, res) => {
   // Logic to create a new contact in Firestore or another database
@@ -54,13 +55,17 @@ app.post("/auth/signup", async (req, res) => {
   }
 });
 
-app.post("/contacts/", async (req, res) => {
+app.post("/interaction/", verifyTokenMiddleware, async (req, res) => {
   // Logic to create a new contact in Firestore or another database
-  const { contactUpdates, id } = req.body;
-  logger.debug(`contacts: Updating ${id || "new contact"}`);
+  const { contact, contactId, interaction } = req.body;
   try {
-    var contact = await upsertContact(contactUpdates, id);
-    res.json({ contact });
+    var interactionObj = await addInteraction(
+      contact,
+      contactId,
+      interaction,
+      req.userId
+    );
+    res.json({ interaction: interactionObj });
   } catch (e) {
     logger.error(`Error ${e}, ${e.stack}`);
     res.status(404).send({ error: "An error has occured" });

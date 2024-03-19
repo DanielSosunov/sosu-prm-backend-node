@@ -108,10 +108,10 @@ async function upsertContact(contactUpdates, contactId, userId) {
     //Updating contact
     await firestore
       .collection(env.CONTACTS_COLLECTION)
-      .doc(id)
+      .doc(contactId)
       .update(contactUpdates);
 
-    return { ...contactUpdates, id };
+    return { ...contactUpdates, id: contactId };
   } else {
     //Creating contact
     contactId = uuid.v4();
