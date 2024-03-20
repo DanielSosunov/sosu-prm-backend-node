@@ -72,7 +72,8 @@ async function setInteractionById(contactId, interactionId, updates) {
   return firestore
     .collection(env.CONTACTS_COLLECTION)
     .doc(contactId)
-    .collection(env.INTERACTIONS_COLLECTION)
+    .collection(env.INTERACTIONS_SUBCOLLECTION)
+    .doc(interactionId)
     .set(updates);
 }
 

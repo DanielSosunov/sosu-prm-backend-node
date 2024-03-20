@@ -1,4 +1,5 @@
-var { env, logger } = require("./env");
+var { env } = require("./env");
+const logger = require("./logger");
 
 const { CloudTasksClient } = require("@google-cloud/tasks").v2;
 
@@ -9,7 +10,7 @@ async function enqueueTask(reminderId, scheduledTime) {
   // Create a Cloud Tasks client
   const client = new CloudTasksClient();
 
-  logger.debug(`Defining Task Payload`);
+  logger.info(`Defining Task Payload`);
   // Define the task payload
   const parent = `projects/${projectId}/locations/${location}/queues/${queueName}`;
   const task = {
@@ -39,7 +40,7 @@ async function enqueueTask(reminderId, scheduledTime) {
   // Enqueue the task
   try {
     const [createdTasks] = await client.createTask(task);
-    logger.debug(`Task created:`, createdTasks);
+    logger.info(`Task created:`, createdTasks);
   } catch (error) {
     logger.error("Error creating task:", error, error.stack);
   }

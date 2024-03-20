@@ -1,4 +1,5 @@
-var { messaging, logger } = require("./env");
+var { messaging } = require("./env");
+const logger = require("./logger");
 
 // Function to send push notification to a specific user
 async function sendPushNotificationToUser(fcmToken, title, message) {
@@ -10,7 +11,7 @@ async function sendPushNotificationToUser(fcmToken, title, message) {
         body: message,
       },
     });
-    logger.debug("Push notification sent successfully.");
+    logger.info("Push notification sent successfully.");
   } catch (error) {
     logger.error("Error sending push notification:", error, error.stack);
   }

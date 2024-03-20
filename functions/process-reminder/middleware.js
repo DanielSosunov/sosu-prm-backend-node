@@ -1,14 +1,16 @@
-var { logger, env } = require("./env");
+var { env } = require("./env");
+const logger = require("./logger");
+
 var { accessSecret } = require("./secretmanager");
 var jwt = require("jsonwebtoken");
 
 const logRequestDetails = (req, res, next) => {
-  logger.debug("Request Path:", req.path);
-  logger.debug("Request URL:", req.url);
-  logger.debug("Request Method:", req.method);
-  logger.debug("Request Headers:", req.headers);
-  logger.debug("Request Body:", req.body);
-  logger.debug("Request Query:", req.query);
+  logger.info("Request Path:", req.path);
+  logger.info("Request URL:", req.url);
+  logger.info("Request Method:", req.method);
+  logger.info("Request Headers:", req.headers);
+  logger.info("Request Body:", req.body);
+  logger.info("Request Query:", req.query);
   next(); // Pass control to the next middleware in the chain
 };
 
@@ -35,7 +37,39 @@ const verifyTokenMiddleware = async (req, res, next) => {
   }
 };
 
+function successHandler(req, res, next) {
+  // Add a custom success method to the response object
+  res.success = (data, statusCode = 200) => {
+    res.status(statusCode).json({
+      success: true,
+      data,
+    });
+  };
+
+  next();
+}
+
+function errorHandler(err, req, res, next) {
+  // Check if the error is a known error
+  if (err.name === "ValidationError") {
+    // Handle validation errors
+    const errors = Object.values(err.errors).map((error) => error.message);
+    return res.status(400).json({ errors });
+  }
+
+  // Log the error for debugging purposes
+  console.error(err);
+
+  // Return a standardized error response
+  return res.status(500).json({
+    error: "Internal Server Error",
+    message: err.message,
+  });
+}
+
 module.exports = {
   logRequestDetails,
   verifyTokenMiddleware,
+  successHandler,
+  errorHandler,
 };

@@ -1,5 +1,5 @@
 const { SecretManagerServiceClient } = require("@google-cloud/secret-manager");
-var { logger } = require("./env");
+const logger = require("./logger");
 
 async function accessSecret(secretName) {
   const client = new SecretManagerServiceClient();

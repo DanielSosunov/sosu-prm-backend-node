@@ -1,57 +1,77 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 var { logRequestDetails, verifyTokenMiddleware } = require("./middleware");
-const {
-  processReminder,
-  login,
-  signup,
-  upsertContact,
-} = require("./functions");
-var { logger } = require("./env");
+const { processReminder, login, signup } = require("./functions");
+const logger = require("./logger");
 const { addInteraction } = require("./interaction");
 
 const app = express();
 app.use(bodyParser.json());
 app.use(logRequestDetails);
 
+function createResponse(
+  data,
+  statusCode = 200,
+  success = true,
+  message = null
+) {
+  return {
+    data,
+    statusCode,
+    success,
+    message,
+  };
+}
+
+function sendResponse(
+  res,
+  data,
+  statusCode = 200,
+  success = true,
+  message = null
+) {
+  const response = createResponse(data, statusCode, success, message);
+  res.status(statusCode).json(response);
+}
+
 // logger.level = "info";
 
 app.post("/reminder-feature", async (req, res) => {
   // Logic to create a new contact in Firestore or another database
   const { reminderId } = req.body;
-  logger.debug(`Processing ${reminderId}`);
+  logger.info(`Processing ${reminderId}`);
   try {
     var newReminderObject = await processReminder(reminderId);
-    res.json({ reminder: newReminderObject });
+    sendResponse(res, { reminder: newReminderObject });
   } catch (e) {
     logger.error(`Error ${e}, ${e.stack}`);
-    res.status(404).send({ error: "An error has occured" });
+    sendResponse(res, null, 404, false, "An error has occured");
   }
 });
 
 app.post("/auth/login", async (req, res) => {
   // Logic to create a new contact in Firestore or another database
   const { username, password } = req.body;
-  logger.debug(`Logging in ${username}`);
+  logger.info(`Logging in ${username}`);
   try {
     var loginToken = await login(username, password);
-    res.json({ token: loginToken });
+    sendResponse(res, { token: loginToken });
   } catch (e) {
     logger.error(`Error ${e}, ${e.stack}`);
-    res.status(404).send({ error: "An error has occured" });
+    sendResponse(res, null, 404, false, "An error has occured");
   }
 });
 
 app.post("/auth/signup", async (req, res) => {
   // Logic to create a new contact in Firestore or another database
   const { username, password } = req.body;
-  logger.debug(`Sign up ${username}`);
+  logger.info(`Sign up ${username}`);
   try {
     var loginToken = await signup(username, password);
-    res.json({ token: loginToken });
+    sendResponse(res, { token: loginToken });
   } catch (e) {
     logger.error(`Error ${e}, ${e.stack}`);
-    res.status(404).send({ error: "An error has occured" });
+    sendResponse(res, null, 404, false, "An error has occured");
   }
 });
 
@@ -65,10 +85,10 @@ app.post("/interaction/", verifyTokenMiddleware, async (req, res) => {
       interaction,
       req.userId
     );
-    res.json({ interaction: interactionObj });
+    sendResponse(res, { interaction: interactionObj });
   } catch (e) {
     logger.error(`Error ${e}, ${e.stack}`);
-    res.status(404).send({ error: "An error has occured" });
+    sendResponse(res, null, 404, false, "An error has occured");
   }
 });
 
