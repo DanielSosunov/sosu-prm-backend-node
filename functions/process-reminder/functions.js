@@ -1,8 +1,8 @@
-const { enqueueTask } = require("./cloudtasks");
+const { enqueueTask } = require("./gcp/cloudtasks");
 var { env, firestore } = require("./env");
-const logger = require("./logger");
+const logger = require("./tools/logger");
 
-const { sendPushNotificationToUser } = require("./fcm");
+const { sendPushNotificationToUser } = require("./gcp/fcm");
 var uuid = require("uuid");
 var {
   getContactById,
@@ -11,8 +11,8 @@ var {
   setReminderById,
   getUserByUsername,
   setUserById,
-} = require("./database-functions");
-var { accessSecret } = require("./secretmanager");
+} = require("./gcp/database-functions");
+var { accessSecret } = require("./gcp/secretmanager");
 var bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
 

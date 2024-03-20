@@ -1,4 +1,4 @@
-var { env, firestore } = require("./env");
+var { env, firestore } = require("../env");
 
 async function getReminderById(reminderId) {
   var reminder = await firestore

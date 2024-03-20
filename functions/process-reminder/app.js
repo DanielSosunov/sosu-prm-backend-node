@@ -1,8 +1,11 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-var { logRequestDetails, verifyTokenMiddleware } = require("./middleware");
+var {
+  logRequestDetails,
+  verifyTokenMiddleware,
+} = require("./tools/middleware");
 const { processReminder, login, signup } = require("./functions");
-const logger = require("./logger");
+const logger = require("./tools/logger");
 const { addInteraction } = require("./interaction");
 
 const app = express();

@@ -2,10 +2,10 @@ const {
   getContactById,
   setContactById,
   setInteractionById,
-} = require("./database-functions");
+} = require("./gcp/database-functions");
 const uuid = require("uuid");
 const { firestore, env } = require("./env");
-const logger = require("./logger");
+const logger = require("./tools/logger");
 
 async function addInteraction(contact, contactId, interaction, userId) {
   //Check if contact exists first

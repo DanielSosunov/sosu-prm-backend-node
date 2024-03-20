@@ -1,7 +1,7 @@
-var { env } = require("./env");
+var { env } = require("../env");
 const logger = require("./logger");
 
-var { accessSecret } = require("./secretmanager");
+var { accessSecret } = require("../gcp/secretmanager");
 var jwt = require("jsonwebtoken");
 
 const logRequestDetails = (req, res, next) => {

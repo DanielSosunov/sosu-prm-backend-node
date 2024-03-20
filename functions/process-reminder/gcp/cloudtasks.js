@@ -1,5 +1,5 @@
-var { env } = require("./env");
-const logger = require("./logger");
+var { env } = require("../env");
+const logger = require("../tools/logger");
 
 const { CloudTasksClient } = require("@google-cloud/tasks").v2;
 
