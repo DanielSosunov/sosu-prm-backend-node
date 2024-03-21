@@ -140,7 +140,7 @@ async function updateContactMonthlyInteractionStats(interactionObj) {
 }
 
 async function updateUserMonthlyInteractionStats(interactionObj) {
-  const { contactId, timestamp } = interactionObj;
+  const { userId, timestamp } = interactionObj;
 
   // Extract the year and month from the timestamp
   const date = new Date(timestamp);
@@ -151,7 +151,7 @@ async function updateUserMonthlyInteractionStats(interactionObj) {
   // Reference to the monthly interactions document
   const monthlyInteractionsRef = firestore
     .collection(env.USERS_COLLECTIONS)
-    .doc(contactId)
+    .doc(userId)
     .collection(env.USER_MONTHLY_INTERACTIONS_SUBCOLLECTION)
     .doc(yearMonth);
 
