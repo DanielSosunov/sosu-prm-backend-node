@@ -29,21 +29,24 @@ async function addInteraction(contact, contactId, interaction, userId) {
     userId,
     timestamp,
   };
-  await setInteractionById(contactId, interactionId, { ...interaction });
+  await setInteractionById(contactId, interactionId, { ...interaction }); // contacts / contactId / interactions
 
-  //Append contacts monthy interaction stats
-  await updateMonthlyInteractionStats(interaction);
+  //Append contacts monthy interaction stats -> contacts / contactId /monthly interactions
+  await updateContactMonthlyInteractionStats(interaction);
 
-  //Append total contact interaction stats
+  //Append total contact interaction stats -> total contacts / contactId
   await updateTotalContactInteractionStats(interaction);
 
-  //Append total user interaction stats
+  //Append monthly user interaction stats -> user / userId / monthly interactions
+  await updateUserMonthlyInteractionStats(interaction);
+
+  //Append total user interaction stats -> total user / user Id
   await updateTotalUserInteractionStats(interaction);
 
   return interaction;
 }
 
-async function updateMonthlyInteractionStats(interactionObj) {
+async function updateContactMonthlyInteractionStats(interactionObj) {
   const { contactId, timestamp } = interactionObj;
 
   // Extract the year and month from the timestamp
@@ -56,7 +59,100 @@ async function updateMonthlyInteractionStats(interactionObj) {
   const monthlyInteractionsRef = firestore
     .collection(env.CONTACTS_COLLECTION)
     .doc(contactId)
-    .collection(env.MONTHLY_INTERACTIONS_SUBCOLLECTION)
+    .collection(env.CONTACT_MONTHLY_INTERACTIONS_SUBCOLLECTION)
+    .doc(yearMonth);
+
+  try {
+    // Get the existing monthly interactions document
+    const monthlyInteractionsDoc = await monthlyInteractionsRef.get();
+
+    let aggregatedStatsObj;
+
+    if (monthlyInteractionsDoc.exists) {
+      // If the document exists, get the existing data
+      aggregatedStatsObj = monthlyInteractionsDoc.data();
+    } else {
+      // If the document doesn't exist, create a new object with initial values
+      aggregatedStatsObj = {
+        totalInteractions: 0,
+        initiatedByMe: 0,
+        initiatedByContact: 0,
+        interactionTypes: {
+          phone: 0,
+          inPerson: 0,
+          messages: 0,
+        },
+        interactionSentiments: {
+          positive: 0,
+          neutral: 0,
+          negative: 0,
+        },
+        interactionPurposes: {
+          personal: 0,
+          business: 0,
+        },
+      };
+    }
+
+    // Increment total interactions
+    aggregatedStatsObj.totalInteractions++;
+
+    // Update initiated by fields
+    if (interactionObj.initiatedBy === "contact") {
+      aggregatedStatsObj.initiatedByContact++;
+    } else if (interactionObj.initiatedBy === "me") {
+      aggregatedStatsObj.initiatedByMe++;
+    }
+
+    // Update interaction types
+    if (interactionObj.type.channel === "phone") {
+      aggregatedStatsObj.interactionTypes.phone++;
+    } else if (interactionObj.type.channel === "inPerson") {
+      aggregatedStatsObj.interactionTypes.inPerson++;
+    } else if (interactionObj.type.channel === "message") {
+      aggregatedStatsObj.interactionTypes.messages++;
+    }
+
+    // Update interaction sentiments
+    if (interactionObj.sentiment === "positive") {
+      aggregatedStatsObj.interactionSentiments.positive++;
+    } else if (interactionObj.sentiment === "neutral") {
+      aggregatedStatsObj.interactionSentiments.neutral++;
+    } else if (interactionObj.sentiment === "negative") {
+      aggregatedStatsObj.interactionSentiments.negative++;
+    }
+
+    // Update interaction purposes
+    if (interactionObj.purpose === "personal") {
+      aggregatedStatsObj.interactionPurposes.personal++;
+    } else if (interactionObj.purpose === "business") {
+      aggregatedStatsObj.interactionPurposes.business++;
+    }
+
+    // Save the updated aggregated stats back to Firestore
+    await monthlyInteractionsRef.set(aggregatedStatsObj);
+
+    logger.info("Monthly interaction stats updated successfully.");
+  } catch (error) {
+    logger.error("Error updating monthly interaction stats:", error);
+    logger.error(interactionObj);
+  }
+}
+
+async function updateUserMonthlyInteractionStats(interactionObj) {
+  const { contactId, timestamp } = interactionObj;
+
+  // Extract the year and month from the timestamp
+  const date = new Date(timestamp);
+  const yearMonth = `${date.getFullYear()}-${String(
+    date.getMonth() + 1
+  ).padStart(2, "0")}`;
+
+  // Reference to the monthly interactions document
+  const monthlyInteractionsRef = firestore
+    .collection(env.USERS_COLLECTIONS)
+    .doc(contactId)
+    .collection(env.USER_MONTHLY_INTERACTIONS_SUBCOLLECTION)
     .doc(yearMonth);
 
   try {
