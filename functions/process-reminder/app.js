@@ -7,6 +7,7 @@ var {
 const { processReminder, login, signup } = require("./functions");
 const logger = require("./tools/logger");
 const { addInteraction } = require("./interaction");
+const { getUserById, updateUserById } = require("./gcp/database-functions");
 
 const app = express();
 app.use(bodyParser.json());
@@ -40,7 +41,7 @@ function sendResponse(
 // logger.level = "info";
 
 app.post("/reminder-feature", async (req, res) => {
-  // Logic to create a new contact in Firestore or another database
+  // Reminder Feature
   const { reminderId } = req.body;
   logger.info(`Processing ${reminderId}`);
   try {
@@ -53,7 +54,7 @@ app.post("/reminder-feature", async (req, res) => {
 });
 
 app.post("/auth/login", async (req, res) => {
-  // Logic to create a new contact in Firestore or another database
+  // login
   const { username, password } = req.body;
   logger.info(`Logging in ${username}`);
   try {
@@ -66,7 +67,7 @@ app.post("/auth/login", async (req, res) => {
 });
 
 app.post("/auth/signup", async (req, res) => {
-  // Logic to create a new contact in Firestore or another database
+  // Sign up
   const { username, password } = req.body;
   logger.info(`Sign up ${username}`);
   try {
@@ -79,7 +80,7 @@ app.post("/auth/signup", async (req, res) => {
 });
 
 app.post("/interaction/", verifyTokenMiddleware, async (req, res) => {
-  // Logic to create a new contact in Firestore or another database
+  // Creating an interaction
   const { contact, contactId, interaction } = req.body;
   try {
     var interactionObj = await addInteraction(
@@ -95,6 +96,30 @@ app.post("/interaction/", verifyTokenMiddleware, async (req, res) => {
   }
 });
 
+app.get("/user/", verifyTokenMiddleware, async (req, res) => {
+  //Pulling user information
+  const { userId } = req;
+  try {
+    var user = await getUserById(userId);
+    sendResponse(res, { user });
+  } catch (e) {
+    logger.error(`Error ${e}, ${e.stack}`);
+    sendResponse(res, null, 404, false, "An error has occured");
+  }
+});
+
+app.post("/user/", verifyTokenMiddleware, async (req, res) => {
+  // Updating User Information
+  const { userId } = req;
+  const { updates } = req.body;
+  try {
+    await updateUserById(userId, updates);
+    sendResponse(res, { updates });
+  } catch (e) {
+    logger.error(`Error ${e}, ${e.stack}`);
+    sendResponse(res, null, 404, false, "An error has occured");
+  }
+});
 // Define other endpoints (PUT, DELETE, etc.) as needed
 
 module.exports = {

@@ -15,7 +15,17 @@ var env = {
 };
 
 var admin = require("firebase-admin");
-admin.initializeApp();
+
+if (process.env.LOCAL_DEV === "true") {
+  // Initialize Firestore with local emulator settings
+  admin.initializeApp({
+    projectId: "prm-sosu-tech",
+    databaseURL: "http://localhost:8080", // Default port for Firestore emulator
+  });
+} else {
+  admin.initializeApp();
+}
+
 var firestore = admin.firestore();
 var messaging = admin.messaging();
 

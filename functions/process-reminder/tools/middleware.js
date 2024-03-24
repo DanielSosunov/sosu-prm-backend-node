@@ -33,7 +33,9 @@ const verifyTokenMiddleware = async (req, res, next) => {
     next();
   } catch (error) {
     // If verification fails, send an error response
-    return res.status(401).json({ error: "Unauthorized: Invalid token" });
+    var err = new Error("Unauthorized");
+    err.name = "AuthorizationError";
+    return errorHandler(err, req, res);
   }
 };
 
@@ -50,18 +52,22 @@ function successHandler(req, res, next) {
 }
 
 function errorHandler(err, req, res, next) {
+  var status = 500;
   // Check if the error is a known error
   if (err.name === "ValidationError") {
     // Handle validation errors
     const errors = Object.values(err.errors).map((error) => error.message);
     return res.status(400).json({ errors });
   }
+  if (err.name === "AuthorizationError") {
+    status = 401;
+  }
 
   // Log the error for debugging purposes
   console.error(err);
 
   // Return a standardized error response
-  return res.status(500).json({
+  return res.status(status).json({
     error: "Internal Server Error",
     message: err.message,
   });

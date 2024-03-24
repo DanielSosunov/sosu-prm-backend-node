@@ -1,16 +1,13 @@
-const log4js = require("log4js");
-
-// Configure log4js
-log4js.configure({
-  appenders: {
-    console: { type: "console" },
+const logger = {
+  info: (...args) => {
+    console.log(`[${new Date().toLocaleString()}] INFO:`, ...args);
   },
-  categories: {
-    default: { appenders: ["console"], level: "info" },
+  debug: (...args) => {
+    console.log(`[${new Date().toLocaleString()}] DEBUG:`, ...args);
   },
-});
-
-// Create a logger instance
-const logger = log4js.getLogger();
+  error: (...args) => {
+    console.error(`[${new Date().toLocaleString()}] ERROR:`, ...args);
+  },
+};
 
 module.exports = logger;
