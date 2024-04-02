@@ -49,7 +49,7 @@ app.post("/reminder-feature", async (req, res) => {
     sendResponse(res, { reminder: newReminderObject });
   } catch (e) {
     logger.error(`Error ${e}, ${e.stack}`);
-    sendResponse(res, null, 404, false, "An error has occured");
+    sendResponse(res, null, 500, false, "An error has occured");
   }
 });
 
@@ -62,7 +62,7 @@ app.post("/auth/login", async (req, res) => {
     sendResponse(res, { token: loginToken });
   } catch (e) {
     logger.error(`Error ${e}, ${e.stack}`);
-    sendResponse(res, null, 404, false, "An error has occured");
+    sendResponse(res, null, 500, false, "An error has occured");
   }
 });
 
@@ -75,7 +75,7 @@ app.post("/auth/signup", async (req, res) => {
     sendResponse(res, { token: loginToken });
   } catch (e) {
     logger.error(`Error ${e}, ${e.stack}`);
-    sendResponse(res, null, 404, false, "An error has occured");
+    sendResponse(res, null, 500, false, "An error has occured");
   }
 });
 
@@ -92,7 +92,7 @@ app.post("/interaction/", verifyTokenMiddleware, async (req, res) => {
     sendResponse(res, { interaction: interactionObj });
   } catch (e) {
     logger.error(`Error ${e}, ${e.stack}`);
-    sendResponse(res, null, 404, false, "An error has occured");
+    sendResponse(res, null, 500, false, "An error has occured");
   }
 });
 
@@ -104,7 +104,7 @@ app.get("/user/", verifyTokenMiddleware, async (req, res) => {
     sendResponse(res, { user });
   } catch (e) {
     logger.error(`Error ${e}, ${e.stack}`);
-    sendResponse(res, null, 404, false, "An error has occured");
+    sendResponse(res, null, 500, false, "An error has occured");
   }
 });
 
@@ -117,7 +117,7 @@ app.post("/user/", verifyTokenMiddleware, async (req, res) => {
     sendResponse(res, { updates });
   } catch (e) {
     logger.error(`Error ${e}, ${e.stack}`);
-    sendResponse(res, null, 404, false, "An error has occured");
+    sendResponse(res, null, 500, false, "An error has occured");
   }
 });
 // Define other endpoints (PUT, DELETE, etc.) as needed

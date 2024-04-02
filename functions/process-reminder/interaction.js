@@ -81,6 +81,7 @@ async function updateContactMonthlyInteractionStats(interactionObj) {
           phone: 0,
           inPerson: 0,
           messages: 0,
+          other: 0,
         },
         interactionSentiments: {
           positive: 0,
@@ -111,6 +112,8 @@ async function updateContactMonthlyInteractionStats(interactionObj) {
       aggregatedStatsObj.interactionTypes.inPerson++;
     } else if (interactionObj.type.channel === "message") {
       aggregatedStatsObj.interactionTypes.messages++;
+    } else if (interactionObj.type.channel === "other") {
+      aggregatedStatsObj.interactionTypes.other++;
     }
 
     // Update interaction sentiments
@@ -174,6 +177,7 @@ async function updateUserMonthlyInteractionStats(interactionObj) {
           phone: 0,
           inPerson: 0,
           messages: 0,
+          other: 0,
         },
         interactionSentiments: {
           positive: 0,
@@ -204,6 +208,8 @@ async function updateUserMonthlyInteractionStats(interactionObj) {
       aggregatedStatsObj.interactionTypes.inPerson++;
     } else if (interactionObj.type.channel === "message") {
       aggregatedStatsObj.interactionTypes.messages++;
+    } else if (interactionObj.type.channel === "other") {
+      aggregatedStatsObj.interactionTypes.other++;
     }
 
     // Update interaction sentiments
@@ -260,6 +266,7 @@ async function updateTotalContactInteractionStats(interactionObj) {
           phone: 0,
           inPerson: 0,
           messages: 0,
+          other: 0,
         },
         interactionSentiments: {
           positive: 0,
@@ -290,6 +297,8 @@ async function updateTotalContactInteractionStats(interactionObj) {
       aggregatedStatsObj.interactionTypes.inPerson++;
     } else if (interactionObj.type.channel === "message") {
       aggregatedStatsObj.interactionTypes.messages++;
+    } else if (interactionObj.type.channel === "other") {
+      aggregatedStatsObj.interactionTypes.other++;
     }
 
     // Update interaction sentiments
@@ -345,6 +354,7 @@ async function updateTotalUserInteractionStats(interactionObj) {
           phone: 0,
           inPerson: 0,
           messages: 0,
+          other: 0,
         },
         interactionSentiments: {
           positive: 0,
@@ -375,6 +385,8 @@ async function updateTotalUserInteractionStats(interactionObj) {
       aggregatedStatsObj.interactionTypes.inPerson++;
     } else if (interactionObj.type.channel === "message") {
       aggregatedStatsObj.interactionTypes.messages++;
+    } else if (interactionObj.type.channel === "other") {
+      aggregatedStatsObj.interactionTypes.other++;
     }
 
     // Update interaction sentiments
