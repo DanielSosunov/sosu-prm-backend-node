@@ -33,6 +33,21 @@ async function getUserById(userId) {
   return user.data();
 }
 
+async function getMonthlyInteractionByContactId(contactId, yearMonth) {
+  var monthlyInteraction = await firestore
+    .collection(env.CONTACTS_COLLECTION)
+    .doc(contactId)
+    .collection(env.CONTACT_MONTHLY_INTERACTIONS_SUBCOLLECTION)
+    .doc(yearMonth)
+    .get();
+
+  if (!monthlyInteraction.exists) {
+    return null;
+  }
+
+  return monthlyInteraction.data();
+}
+
 async function getUserByUsername(username) {
   const usersSnapshot = await firestore
     .collection(env.USERS_COLLECTIONS)
@@ -85,6 +100,47 @@ async function setUserById(uid, data) {
   return firestore.collection(env.USERS_COLLECTIONS).doc(uid).set(data);
 }
 
+async function getContactInteractionById_doc(contactId, interactionId) {
+  var interaction = await firestore
+    .collection(env.CONTACTS_COLLECTION)
+    .doc(contactId)
+    .collection(env.INTERACTIONS_SUBCOLLECTION)
+    .doc(interactionId)
+    .get();
+  if (!interaction.exists) {
+    return null;
+  }
+  return interaction;
+}
+async function getInteractions_paginated(contactId, startAfter) {
+  let query = firestore
+    .collection(env.CONTACTS_COLLECTION)
+    .doc(contactId)
+    .collection(env.INTERACTIONS_SUBCOLLECTION)
+    .orderBy("timestamp", "desc")
+    .limit(5);
+
+  if (startAfter) {
+    const doc = await getContactInteractionById_doc(contactId, startAfter);
+    if (!doc.exists) throw "PAGINATED_DOCUMENT_DOES_NOT_EXIST";
+    query = query.startAfter(doc);
+  }
+
+  const snapshot = await query.get();
+  const interactions = [];
+  let lastVisible = null;
+
+  snapshot.forEach((doc) => {
+    interactions.push({ id: doc.id, ...doc.data() });
+    lastVisible = doc;
+  });
+
+  //Set lastvisible to null if the elements are not 10.
+  if (interactions.length < 5) lastVisible = null;
+
+  return { interactions, lastVisible: lastVisible ? lastVisible.id : null };
+}
+
 module.exports = {
   getUserById,
   getContactById,
@@ -95,4 +151,6 @@ module.exports = {
   updateUserById,
   setContactById,
   setInteractionById,
+  getMonthlyInteractionByContactId,
+  getInteractions_paginated,
 };

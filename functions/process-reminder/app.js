@@ -6,12 +6,27 @@ var {
 } = require("./tools/middleware");
 const { processReminder, login, signup } = require("./functions");
 const logger = require("./tools/logger");
-const { addInteraction } = require("./interaction");
-const { getUserById, updateUserById } = require("./gcp/database-functions");
+const {
+  addInteraction,
+  getMonthlyInteractionOfContact,
+} = require("./interaction");
+const {
+  getUserById,
+  updateUserById,
+  getInteractions_paginated,
+} = require("./gcp/database-functions");
+const cors = require("cors");
 
 const app = express();
 app.use(bodyParser.json());
 app.use(logRequestDetails);
+
+const corsOptions = {
+  origin: "*",
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
 
 function createResponse(
   data,
@@ -121,6 +136,39 @@ app.post("/user/", verifyTokenMiddleware, async (req, res) => {
   }
 });
 // Define other endpoints (PUT, DELETE, etc.) as needed
+
+app.get("/analytics/monthly", verifyTokenMiddleware, async (req, res) => {
+  //Pulling user information
+  const { userId } = req;
+  const { contactId, yearMonth } = req.query;
+  try {
+    var monthlyInteraction = await getMonthlyInteractionOfContact(
+      contactId,
+      yearMonth
+    );
+    sendResponse(res, { monthlyInteraction });
+  } catch (e) {
+    logger.error(`Error ${e}, ${e.stack}`);
+    sendResponse(res, null, 500, false, "An error has occured");
+  }
+});
+
+app.get("/interaction/paginated", verifyTokenMiddleware, async (req, res) => {
+  //Pulling user information
+  //Maybe also verify that contact is part of user connection
+  const { userId } = req;
+  const { contactId, startAfter } = req.query;
+  try {
+    var { interactions, lastVisible } = await getInteractions_paginated(
+      contactId,
+      startAfter
+    );
+    sendResponse(res, { interactions, lastVisible });
+  } catch (e) {
+    logger.error(`Error ${e}, ${e.stack}`);
+    sendResponse(res, null, 500, false, "An error has occured");
+  }
+});
 
 module.exports = {
   app,

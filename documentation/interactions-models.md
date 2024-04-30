@@ -58,12 +58,7 @@ javascript
   "interactionPurposes": {
     "personal": 7,
     "business": 3
-  },
-  "resolvedIssues": 2,
-  "pendingFollowUps": 1,
-  "averageResponseTime": 2.5,
-  "longestInteractionDuration": 120,
-  "shortestInteractionDuration": 5
+  }
 }
 ```
 
