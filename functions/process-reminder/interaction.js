@@ -8,7 +8,7 @@ const uuid = require("uuid");
 const { firestore, env } = require("./env");
 const logger = require("./tools/logger");
 
-async function addInteraction(contact, contactId, interaction, userId) {
+async function addInteraction(contact, contactId, interaction, diary, userId) {
   //Check if contact exists first
   var findContact = await getContactById(contactId);
   if (findContact === null) {
@@ -30,6 +30,7 @@ async function addInteraction(contact, contactId, interaction, userId) {
     userId,
     timestamp,
   };
+  if (diary) interaction.diary = diary;
   await setInteractionById(contactId, interactionId, { ...interaction }); // contacts / contactId / interactions
 
   //Append contacts monthy interaction stats -> contacts / contactId /monthly interactions

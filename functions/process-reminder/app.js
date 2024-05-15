@@ -96,12 +96,13 @@ app.post("/auth/signup", async (req, res) => {
 
 app.post("/interaction/", verifyTokenMiddleware, async (req, res) => {
   // Creating an interaction
-  const { contact, contactId, interaction } = req.body;
+  const { contact, contactId, interaction, diary } = req.body;
   try {
     var interactionObj = await addInteraction(
       contact,
       contactId,
       interaction,
+      diary,
       req.userId
     );
     sendResponse(res, { interaction: interactionObj });
