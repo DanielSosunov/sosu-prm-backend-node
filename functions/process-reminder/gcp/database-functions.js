@@ -91,6 +91,14 @@ async function setInteractionById(contactId, interactionId, updates) {
     .doc(interactionId)
     .set(updates);
 }
+async function setInteractionByIdForUser(userId, interactionId, updates) {
+  return firestore
+    .collection(env.USERS_COLLECTIONS)
+    .doc(userId)
+    .collection(env.INTERACTIONS_SUBCOLLECTION)
+    .doc(interactionId)
+    .set(updates);
+}
 
 async function updateUserById(uid, updates) {
   return firestore.collection(env.USERS_COLLECTIONS).doc(uid).update(updates);
@@ -104,6 +112,18 @@ async function getContactInteractionById_doc(contactId, interactionId) {
   var interaction = await firestore
     .collection(env.CONTACTS_COLLECTION)
     .doc(contactId)
+    .collection(env.INTERACTIONS_SUBCOLLECTION)
+    .doc(interactionId)
+    .get();
+  if (!interaction.exists) {
+    return null;
+  }
+  return interaction;
+}
+async function getInteractionOfUserByInteractionId(userId, interactionId) {
+  var interaction = await firestore
+    .collection(env.USERS_COLLECTIONS)
+    .doc(userId)
     .collection(env.INTERACTIONS_SUBCOLLECTION)
     .doc(interactionId)
     .get();
@@ -140,6 +160,37 @@ async function getInteractions_paginated(contactId, startAfter) {
 
   return { interactions, lastVisible: lastVisible ? lastVisible.id : null };
 }
+async function getInteractionsByUser_paginated(userId, contactId, startAfter) {
+  console.log(`Paginated Interactions Call`, userId, contactId, startAfter);
+  let query = firestore
+    .collection(env.USERS_COLLECTIONS)
+    .doc(userId)
+    .collection(env.INTERACTIONS_SUBCOLLECTION)
+    .where("contactId", "==", contactId);
+  // if (contactId) query.where("contactId", "==", contactId);
+
+  query.orderBy("timestamp", "desc").limit(5);
+
+  if (startAfter) {
+    const doc = await getInteractionOfUserByInteractionId(userId, startAfter);
+    if (!doc.exists) throw "PAGINATED_DOCUMENT_DOES_NOT_EXIST";
+    query = query.startAfter(doc);
+  }
+
+  const snapshot = await query.get();
+  const interactions = [];
+  let lastVisible = null;
+
+  snapshot.forEach((doc) => {
+    interactions.push({ id: doc.id, ...doc.data() });
+    lastVisible = doc;
+  });
+
+  //Set lastvisible to null if the elements are not 10.
+  if (interactions.length < 5) lastVisible = null;
+
+  return { interactions, lastVisible: lastVisible ? lastVisible.id : null };
+}
 
 module.exports = {
   getUserById,
@@ -153,4 +204,6 @@ module.exports = {
   setInteractionById,
   getMonthlyInteractionByContactId,
   getInteractions_paginated,
+  setInteractionByIdForUser,
+  getInteractionsByUser_paginated,
 };

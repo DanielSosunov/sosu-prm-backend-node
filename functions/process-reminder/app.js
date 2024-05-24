@@ -14,6 +14,7 @@ const {
   getUserById,
   updateUserById,
   getInteractions_paginated,
+  getInteractionsByUser_paginated,
 } = require("./gcp/database-functions");
 const cors = require("cors");
 
@@ -160,7 +161,8 @@ app.get("/interaction/paginated", verifyTokenMiddleware, async (req, res) => {
   const { userId } = req;
   const { contactId, startAfter } = req.query;
   try {
-    var { interactions, lastVisible } = await getInteractions_paginated(
+    var { interactions, lastVisible } = await getInteractionsByUser_paginated(
+      userId,
       contactId,
       startAfter
     );

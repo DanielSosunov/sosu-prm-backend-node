@@ -3,6 +3,7 @@ const {
   setContactById,
   setInteractionById,
   getMonthlyInteractionByContactId,
+  setInteractionByIdForUser,
 } = require("./gcp/database-functions");
 const uuid = require("uuid");
 const { firestore, env } = require("./env");
@@ -32,6 +33,8 @@ async function addInteraction(contact, contactId, interaction, diary, userId) {
   };
   if (diary) interaction.diary = diary;
   await setInteractionById(contactId, interactionId, { ...interaction }); // contacts / contactId / interactions
+
+  await setInteractionByIdForUser(userId, interactionId, interaction); // users/uid/interactions/iid/interaction
 
   //Append contacts monthy interaction stats -> contacts / contactId /monthly interactions
   await updateContactMonthlyInteractionStats(interaction);
