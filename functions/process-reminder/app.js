@@ -15,6 +15,7 @@ const {
   updateUserById,
   getInteractions_paginated,
   getInteractionsByUser_paginated,
+  getContactById,
 } = require("./gcp/database-functions");
 const cors = require("cors");
 
@@ -167,6 +168,22 @@ app.get("/interaction/paginated", verifyTokenMiddleware, async (req, res) => {
       startAfter
     );
     sendResponse(res, { interactions, lastVisible });
+  } catch (e) {
+    logger.error(`Error ${e}, ${e.stack}`);
+    sendResponse(res, null, 500, false, "An error has occured");
+  }
+});
+
+app.get("/contact/:contactId", verifyTokenMiddleware, async (req, res) => {
+  //Pulling contact information
+  const contactId = req.params.contactId;
+
+  try {
+    var contact = await getContactById(contactId);
+    if (contact === null) throw "INVALID_CONTACT";
+    if (contact.userId !== req.userId)
+      throw "UNAUTHORIZED_CONTACT_RELATIONSHIP";
+    sendResponse(res, { contact });
   } catch (e) {
     logger.error(`Error ${e}, ${e.stack}`);
     sendResponse(res, null, 500, false, "An error has occured");

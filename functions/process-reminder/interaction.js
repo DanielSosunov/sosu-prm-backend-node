@@ -442,6 +442,28 @@ async function getMonthlyInteractionOfContact(contactId, yearMonth) {
   );
   return monthlyInteraction ? { ...monthlyInteraction, yearMonth } : null;
 }
+async function getMonthlyInteractionOfUser(contactId, yearMonth) {
+  if (
+    yearMonth === undefined ||
+    yearMonth === null ||
+    yearMonth === `undefined` ||
+    yearMonth === `null`
+  ) {
+    // Extract the year and month from the timestamp
+    const date = new Date();
+    yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}`;
+  }
+  logger.info(`yearMonth`, yearMonth);
+
+  var monthlyInteraction = await getMonthlyInteractionByContactId(
+    contactId,
+    yearMonth
+  );
+  return monthlyInteraction ? { ...monthlyInteraction, yearMonth } : null;
+}
 
 module.exports = {
   addInteraction,

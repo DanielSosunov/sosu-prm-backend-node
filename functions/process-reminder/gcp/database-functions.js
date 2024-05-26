@@ -19,7 +19,7 @@ async function getContactById(contactId) {
   if (!contact.exists) {
     return null;
   }
-  return contact.data();
+  return { ...contact.data(), id: contactId };
 }
 
 async function getUserById(userId) {
@@ -165,11 +165,11 @@ async function getInteractionsByUser_paginated(userId, contactId, startAfter) {
   let query = firestore
     .collection(env.USERS_COLLECTIONS)
     .doc(userId)
-    .collection(env.INTERACTIONS_SUBCOLLECTION)
-    .where("contactId", "==", contactId);
-  // if (contactId) query.where("contactId", "==", contactId);
+    .collection(env.INTERACTIONS_SUBCOLLECTION);
 
-  query.orderBy("timestamp", "desc").limit(5);
+  if (contactId) query = query.where("contactId", "==", contactId);
+
+  query = query.orderBy("timestamp", "desc").limit(5);
 
   if (startAfter) {
     const doc = await getInteractionOfUserByInteractionId(userId, startAfter);
