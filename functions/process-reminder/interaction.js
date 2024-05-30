@@ -14,7 +14,6 @@ async function addInteraction(contact, contactId, interaction, diary, userId) {
   var findContact = await getContactById(contactId);
   if (findContact === null) {
     //If there is no contact create the contact in the db
-    contactId = uuid.v4();
     await setContactById(contactId, {
       ...contact,
       createdAt: new Date().getTime(),
