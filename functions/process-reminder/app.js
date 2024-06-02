@@ -16,6 +16,7 @@ const {
   getInteractions_paginated,
   getInteractionsByUser_paginated,
   getContactById,
+  getContactsByUserId,
 } = require("./gcp/database-functions");
 const cors = require("cors");
 
@@ -184,6 +185,16 @@ app.get("/contact/:contactId", verifyTokenMiddleware, async (req, res) => {
     if (contact.userId !== req.userId)
       throw "UNAUTHORIZED_CONTACT_RELATIONSHIP";
     sendResponse(res, { contact });
+  } catch (e) {
+    logger.error(`Error ${e}, ${e.stack}`);
+    sendResponse(res, null, 500, false, "An error has occured");
+  }
+});
+app.get("/contacts", verifyTokenMiddleware, async (req, res) => {
+  try {
+    var contacts = await getContactsByUserId(req.userId);
+
+    sendResponse(res, { contacts });
   } catch (e) {
     logger.error(`Error ${e}, ${e.stack}`);
     sendResponse(res, null, 500, false, "An error has occured");

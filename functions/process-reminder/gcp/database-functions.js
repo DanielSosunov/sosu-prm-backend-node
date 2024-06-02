@@ -68,6 +68,25 @@ async function getUserByUsername(username) {
   if (users.length > 0) return users[0];
   return null;
 }
+async function getContactsByUserId(userId) {
+  const contactsSnapshot = await firestore
+    .collection(env.CONTACTS_COLLECTION)
+    .where("userId", "==", userId)
+    .get();
+
+  var contacts = [];
+  contactsSnapshot.forEach((doc) => {
+    // Get the data from each document
+    const contactData = doc.data();
+    // Add the user data to the array
+    contacts.push({
+      ...contactData,
+      id: doc.id,
+    });
+  });
+
+  return contacts.sort((a, b) => a.name - b.name);
+}
 
 async function setReminderById(reminderId, updates) {
   return firestore
@@ -198,6 +217,7 @@ module.exports = {
   getReminderById,
   setReminderById,
   getUserByUsername,
+  getContactsByUserId,
   setUserById,
   updateUserById,
   setContactById,
