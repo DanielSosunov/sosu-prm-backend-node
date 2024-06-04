@@ -17,6 +17,7 @@ const {
   getInteractionsByUser_paginated,
   getContactById,
   getContactsByUserId,
+  getContactsByUserId_paginated,
 } = require("./gcp/database-functions");
 const cors = require("cors");
 
@@ -192,9 +193,14 @@ app.get("/contact/:contactId", verifyTokenMiddleware, async (req, res) => {
 });
 app.get("/contacts", verifyTokenMiddleware, async (req, res) => {
   try {
-    var contacts = await getContactsByUserId(req.userId);
+    const { startAfter } = req.query;
 
-    sendResponse(res, { contacts });
+    var { contacts, lastVisible } = await getContactsByUserId_paginated(
+      req.userId,
+      startAfter
+    );
+
+    sendResponse(res, { contacts, lastVisible });
   } catch (e) {
     logger.error(`Error ${e}, ${e.stack}`);
     sendResponse(res, null, 500, false, "An error has occured");

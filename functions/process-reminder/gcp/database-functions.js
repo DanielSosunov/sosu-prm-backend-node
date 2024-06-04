@@ -21,6 +21,16 @@ async function getContactById(contactId) {
   }
   return { ...contact.data(), id: contactId };
 }
+async function getContactById_doc(contactId) {
+  var contact = await firestore
+    .collection(env.CONTACTS_COLLECTION)
+    .doc(contactId)
+    .get();
+  if (!contact.exists) {
+    return null;
+  }
+  return contact;
+}
 
 async function getUserById(userId) {
   var user = await firestore
@@ -210,6 +220,43 @@ async function getInteractionsByUser_paginated(userId, contactId, startAfter) {
 
   return { interactions, lastVisible: lastVisible ? lastVisible.id : null };
 }
+async function getContactsByUserId_paginated(userId, startAfter) {
+  console.log(`getContactsByUserId_paginated Call`, userId, startAfter);
+
+  var contactsSnapshot = firestore
+    .collection(env.CONTACTS_COLLECTION)
+    .where("userId", "==", userId)
+    .orderBy("name", "asc")
+    .limit(5);
+
+  if (startAfter) {
+    const doc = await getContactById_doc(startAfter);
+    if (doc === null) throw "PAGINATED_DOCUMENT_DOES_NOT_EXIST";
+    contactsSnapshot = contactsSnapshot.startAfter(doc);
+  }
+
+  contactsSnapshot = await contactsSnapshot.get();
+
+  let lastVisible = null;
+
+  var contacts = [];
+  contactsSnapshot.forEach((doc) => {
+    // Get the data from each document
+    const contactData = doc.data();
+    // Add the user data to the array
+    contacts.push({
+      ...contactData,
+      id: doc.id,
+    });
+    lastVisible = doc;
+  });
+  if (contacts.length < 5) lastVisible = null;
+
+  return {
+    contacts: contacts.sort((a, b) => a.name - b.name),
+    lastVisible: lastVisible ? lastVisible.id : null,
+  };
+}
 
 module.exports = {
   getUserById,
@@ -223,6 +270,7 @@ module.exports = {
   setContactById,
   setInteractionById,
   getMonthlyInteractionByContactId,
+  getContactsByUserId_paginated,
   getInteractions_paginated,
   setInteractionByIdForUser,
   getInteractionsByUser_paginated,
