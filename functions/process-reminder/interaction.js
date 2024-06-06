@@ -4,6 +4,7 @@ const {
   setInteractionById,
   getMonthlyInteractionByContactId,
   setInteractionByIdForUser,
+  getMonthlyInteractionByUserId,
 } = require("./gcp/database-functions");
 const uuid = require("uuid");
 const { firestore, env } = require("./env");
@@ -441,7 +442,7 @@ async function getMonthlyInteractionOfContact(contactId, yearMonth) {
   );
   return monthlyInteraction ? { ...monthlyInteraction, yearMonth } : null;
 }
-async function getMonthlyInteractionOfUser(contactId, yearMonth) {
+async function getMonthlyInteractionOfUser(userId, yearMonth) {
   if (
     yearMonth === undefined ||
     yearMonth === null ||
@@ -457,8 +458,8 @@ async function getMonthlyInteractionOfUser(contactId, yearMonth) {
   }
   logger.info(`yearMonth`, yearMonth);
 
-  var monthlyInteraction = await getMonthlyInteractionByContactId(
-    contactId,
+  var monthlyInteraction = await getMonthlyInteractionByUserId(
+    userId,
     yearMonth
   );
   return monthlyInteraction ? { ...monthlyInteraction, yearMonth } : null;
@@ -467,4 +468,5 @@ async function getMonthlyInteractionOfUser(contactId, yearMonth) {
 module.exports = {
   addInteraction,
   getMonthlyInteractionOfContact,
+  getMonthlyInteractionOfUser,
 };

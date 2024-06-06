@@ -57,6 +57,20 @@ async function getMonthlyInteractionByContactId(contactId, yearMonth) {
 
   return monthlyInteraction.data();
 }
+async function getMonthlyInteractionByUserId(userId, yearMonth) {
+  var monthlyInteraction = await firestore
+    .collection(env.USERS_COLLECTIONS)
+    .doc(userId)
+    .collection(env.USER_MONTHLY_INTERACTIONS_SUBCOLLECTION)
+    .doc(yearMonth)
+    .get();
+
+  if (!monthlyInteraction.exists) {
+    return null;
+  }
+
+  return monthlyInteraction.data();
+}
 
 async function getUserByUsername(username) {
   const usersSnapshot = await firestore
@@ -210,10 +224,23 @@ async function getInteractionsByUser_paginated(userId, contactId, startAfter) {
   const interactions = [];
   let lastVisible = null;
 
+  var contactPromises = [];
   snapshot.forEach((doc) => {
-    interactions.push({ id: doc.id, ...doc.data() });
+    var docData = doc.data();
+    var contactId = docData.contactId;
+    interactions.push({ id: doc.id, ...docData });
+    if (contactId && !contactPromises.includes(contactId))
+      contactPromises.push(getContactById(contactId));
     lastVisible = doc;
   });
+
+  var contactPulls = await Promise.all(contactPromises);
+  console.log(`Pulled ${contactPulls.length} contacts`);
+  for (var i = 0; i < interactions.length; i++) {
+    var cId = interactions[i][`contactId`];
+    var findFromPull = contactPulls.find((element) => element.id === cId);
+    if (findFromPull) interactions[i][`contactName`] = findFromPull[`name`];
+  }
 
   //Set lastvisible to null if the elements are not 10.
   if (interactions.length < 5) lastVisible = null;
@@ -270,6 +297,7 @@ module.exports = {
   setContactById,
   setInteractionById,
   getMonthlyInteractionByContactId,
+  getMonthlyInteractionByUserId,
   getContactsByUserId_paginated,
   getInteractions_paginated,
   setInteractionByIdForUser,

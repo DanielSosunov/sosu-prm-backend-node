@@ -9,6 +9,7 @@ const logger = require("./tools/logger");
 const {
   addInteraction,
   getMonthlyInteractionOfContact,
+  getMonthlyInteractionOfUser,
 } = require("./interaction");
 const {
   getUserById,
@@ -147,10 +148,17 @@ app.get("/analytics/monthly", verifyTokenMiddleware, async (req, res) => {
   const { userId } = req;
   const { contactId, yearMonth } = req.query;
   try {
-    var monthlyInteraction = await getMonthlyInteractionOfContact(
-      contactId,
-      yearMonth
-    );
+    var monthlyInteraction;
+
+    if (contactId) {
+      monthlyInteraction = await getMonthlyInteractionOfContact(
+        contactId,
+        yearMonth
+      );
+    } else {
+      monthlyInteraction = await getMonthlyInteractionOfUser(userId, yearMonth);
+    }
+
     sendResponse(res, { monthlyInteraction });
   } catch (e) {
     logger.error(`Error ${e}, ${e.stack}`);
