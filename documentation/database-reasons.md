@@ -7,5 +7,5 @@
 # Contact Interactions
 
 /contactTotalInteractions/cid - Total Analytics for a contact
-/contacts/cid/interactions - Each Interaction for a contact
+/contacts/cid/interactions - Each Interaction for a contact <--> Not necessary
 /contacts/contactMonthlyInteractions/month - Total Analytics Per Month for a contact

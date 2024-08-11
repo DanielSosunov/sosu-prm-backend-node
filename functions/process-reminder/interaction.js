@@ -32,6 +32,7 @@ async function addInteraction(contact, contactId, interaction, diary, userId) {
     timestamp,
   };
   if (diary) interaction.diary = diary;
+  
   await setInteractionById(contactId, interactionId, { ...interaction }); // contacts / contactId / interactions
 
   await setInteractionByIdForUser(userId, interactionId, interaction); // users/uid/interactions/iid/interaction
