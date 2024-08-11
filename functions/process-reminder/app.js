@@ -19,6 +19,7 @@ const {
   getContactsByUserId,
   getContactsByUserId_paginated,
   getTotalInteractionsByContactId,
+  getTotalInteractionsByUserId,
 } = require("./gcp/database-functions");
 const cors = require("cors");
 
@@ -157,10 +158,14 @@ app.get("/analytics/monthly", verifyTokenMiddleware, async (req, res) => {
 app.get("/analytics/all", verifyTokenMiddleware, async (req, res) => {
   //Pulling user information
   const { contactId } = req.query;
+  const { userId } = req;
+
   try {
     var totalInteractions;
 
-    totalInteractions = await getTotalInteractionsByContactId(contactId);
+    if (contactId)
+      totalInteractions = await getTotalInteractionsByContactId(contactId);
+    else totalInteractions = await getTotalInteractionsByUserId(userId);
 
     sendResponse(res, { totalInteractions });
   } catch (e) {

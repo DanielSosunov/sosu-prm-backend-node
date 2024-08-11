@@ -69,6 +69,18 @@ async function getTotalInteractionsByContactId(contactId) {
 
   return totalInterations.data();
 }
+async function getTotalInteractionsByUserId(userId) {
+  var totalInterations = await firestore
+    .collection(env.USER_INTERACTIONS_COLLECTION)
+    .doc(userId)
+    .get();
+
+  if (!totalInterations.exists) {
+    return null;
+  }
+
+  return totalInterations.data();
+}
 async function getMonthlyInteractionByUserId(userId, yearMonth) {
   var monthlyInteraction = await firestore
     .collection(env.USERS_COLLECTIONS)
@@ -333,6 +345,7 @@ module.exports = {
   getMonthlyInteractionByContactId,
   getMonthlyInteractionByUserId,
   getTotalInteractionsByContactId,
+  getTotalInteractionsByUserId,
   getContactsByUserId_paginated,
   setInteractionByIdForUser,
   getInteractionsByUser_paginated,
