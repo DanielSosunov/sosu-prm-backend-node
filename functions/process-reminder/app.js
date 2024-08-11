@@ -4,7 +4,7 @@ var {
   logRequestDetails,
   verifyTokenMiddleware,
 } = require("./tools/middleware");
-const { processReminder, login, signup } = require("./functions");
+const { login, signup } = require("./functions");
 const logger = require("./tools/logger");
 const {
   addInteraction,
@@ -14,11 +14,11 @@ const {
 const {
   getUserById,
   updateUserById,
-  getInteractions_paginated,
   getInteractionsByUser_paginated,
   getContactById,
   getContactsByUserId,
   getContactsByUserId_paginated,
+  getTotalInteractionsByContactId,
 } = require("./gcp/database-functions");
 const cors = require("cors");
 
@@ -59,19 +59,6 @@ function sendResponse(
 }
 
 // logger.level = "info";
-
-app.post("/reminder-feature", async (req, res) => {
-  // Reminder Feature
-  const { reminderId } = req.body;
-  logger.info(`Processing ${reminderId}`);
-  try {
-    var newReminderObject = await processReminder(reminderId);
-    sendResponse(res, { reminder: newReminderObject });
-  } catch (e) {
-    logger.error(`Error ${e}, ${e.stack}`);
-    sendResponse(res, null, 500, false, "An error has occured");
-  }
-});
 
 app.post("/auth/login", async (req, res) => {
   // login
@@ -156,6 +143,7 @@ app.get("/analytics/monthly", verifyTokenMiddleware, async (req, res) => {
         yearMonth
       );
     } else {
+      //Is this necessary before MVP?
       monthlyInteraction = await getMonthlyInteractionOfUser(userId, yearMonth);
     }
 
@@ -166,16 +154,32 @@ app.get("/analytics/monthly", verifyTokenMiddleware, async (req, res) => {
   }
 });
 
+app.get("/analytics/all", verifyTokenMiddleware, async (req, res) => {
+  //Pulling user information
+  const { contactId } = req.query;
+  try {
+    var totalInteractions;
+
+    totalInteractions = await getTotalInteractionsByContactId(contactId);
+
+    sendResponse(res, { totalInteractions });
+  } catch (e) {
+    logger.error(`Error ${e}, ${e.stack}`);
+    sendResponse(res, null, 500, false, "An error has occured");
+  }
+});
+
 app.get("/interaction/paginated", verifyTokenMiddleware, async (req, res) => {
   //Pulling user information
   //Maybe also verify that contact is part of user connection
   const { userId } = req;
-  const { contactId, startAfter } = req.query;
+  const { contactId, startAfter, yearMonth } = req.query;
   try {
     var { interactions, lastVisible } = await getInteractionsByUser_paginated(
       userId,
       contactId,
-      startAfter
+      startAfter,
+      yearMonth
     );
     sendResponse(res, { interactions, lastVisible });
   } catch (e) {

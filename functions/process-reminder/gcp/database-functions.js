@@ -57,6 +57,18 @@ async function getMonthlyInteractionByContactId(contactId, yearMonth) {
 
   return monthlyInteraction.data();
 }
+async function getTotalInteractionsByContactId(contactId) {
+  var totalInterations = await firestore
+    .collection(env.CONTACT_INTERACTIONS_COLLECTION)
+    .doc(contactId)
+    .get();
+
+  if (!totalInterations.exists) {
+    return null;
+  }
+
+  return totalInterations.data();
+}
 async function getMonthlyInteractionByUserId(userId, yearMonth) {
   var monthlyInteraction = await firestore
     .collection(env.USERS_COLLECTIONS)
@@ -203,14 +215,36 @@ async function getInteractions_paginated(contactId, startAfter) {
 
   return { interactions, lastVisible: lastVisible ? lastVisible.id : null };
 }
-async function getInteractionsByUser_paginated(userId, contactId, startAfter) {
-  console.log(`Paginated Interactions Call`, userId, contactId, startAfter);
+async function getInteractionsByUser_paginated(
+  userId,
+  contactId,
+  startAfter,
+  dateRange
+) {
+  console.log(
+    `Paginated Interactions Call`,
+    userId,
+    contactId,
+    startAfter,
+    dateRange
+  );
   let query = firestore
     .collection(env.USERS_COLLECTIONS)
     .doc(userId)
     .collection(env.INTERACTIONS_SUBCOLLECTION);
 
   if (contactId) query = query.where("contactId", "==", contactId);
+
+  // Apply date range filter
+  if (dateRange && dateRange !== "All") {
+    const startDate = new Date(dateRange + "-01T00:00:00Z"); // Assuming dateRange is in "YYYY-MM" format
+    const endDate = new Date(startDate);
+    endDate.setMonth(endDate.getMonth() + 1);
+
+    query = query
+      .where("timestamp", ">=", startDate.toISOString())
+      .where("timestamp", "<", endDate.toISOString());
+  }
 
   query = query.orderBy("timestamp", "desc").limit(5);
 
@@ -235,10 +269,10 @@ async function getInteractionsByUser_paginated(userId, contactId, startAfter) {
   });
 
   var contactPulls = await Promise.all(contactPromises);
-  console.log(`Pulled ${contactPulls.length} contacts`);
+  console.log(`Pulled ${contactPulls.length} contacts`, contactPulls);
   for (var i = 0; i < interactions.length; i++) {
     var cId = interactions[i][`contactId`];
-    var findFromPull = contactPulls.find((element) => element.id === cId);
+    var findFromPull = contactPulls.find((element) => element?.id === cId);
     if (findFromPull) interactions[i][`contactName`] = findFromPull[`name`];
   }
 
@@ -298,8 +332,8 @@ module.exports = {
   setInteractionById,
   getMonthlyInteractionByContactId,
   getMonthlyInteractionByUserId,
+  getTotalInteractionsByContactId,
   getContactsByUserId_paginated,
-  getInteractions_paginated,
   setInteractionByIdForUser,
   getInteractionsByUser_paginated,
 };

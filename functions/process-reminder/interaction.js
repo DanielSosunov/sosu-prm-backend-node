@@ -32,7 +32,7 @@ async function addInteraction(contact, contactId, interaction, diary, userId) {
     timestamp,
   };
   if (diary) interaction.diary = diary;
-  
+
   await setInteractionById(contactId, interactionId, { ...interaction }); // contacts / contactId / interactions
 
   await setInteractionByIdForUser(userId, interactionId, interaction); // users/uid/interactions/iid/interaction
@@ -112,13 +112,13 @@ async function updateContactMonthlyInteractionStats(interactionObj) {
     }
 
     // Update interaction types
-    if (interactionObj.type.channel === "phone") {
+    if (interactionObj.type === "phone") {
       aggregatedStatsObj.interactionTypes.phone++;
-    } else if (interactionObj.type.channel === "inPerson") {
+    } else if (interactionObj.type === "inPerson") {
       aggregatedStatsObj.interactionTypes.inPerson++;
-    } else if (interactionObj.type.channel === "message") {
+    } else if (interactionObj.type === "message") {
       aggregatedStatsObj.interactionTypes.messages++;
-    } else if (interactionObj.type.channel === "other") {
+    } else if (interactionObj.type === "other") {
       aggregatedStatsObj.interactionTypes.other++;
     }
 
@@ -208,13 +208,13 @@ async function updateUserMonthlyInteractionStats(interactionObj) {
     }
 
     // Update interaction types
-    if (interactionObj.type.channel === "phone") {
+    if (interactionObj.type === "phone") {
       aggregatedStatsObj.interactionTypes.phone++;
-    } else if (interactionObj.type.channel === "inPerson") {
+    } else if (interactionObj.type === "inPerson") {
       aggregatedStatsObj.interactionTypes.inPerson++;
-    } else if (interactionObj.type.channel === "message") {
+    } else if (interactionObj.type === "message") {
       aggregatedStatsObj.interactionTypes.messages++;
-    } else if (interactionObj.type.channel === "other") {
+    } else if (interactionObj.type === "other") {
       aggregatedStatsObj.interactionTypes.other++;
     }
 
@@ -297,13 +297,13 @@ async function updateTotalContactInteractionStats(interactionObj) {
     }
 
     // Update interaction types
-    if (interactionObj.type.channel === "phone") {
+    if (interactionObj.type === "phone") {
       aggregatedStatsObj.interactionTypes.phone++;
-    } else if (interactionObj.type.channel === "inPerson") {
+    } else if (interactionObj.type === "inPerson") {
       aggregatedStatsObj.interactionTypes.inPerson++;
-    } else if (interactionObj.type.channel === "message") {
+    } else if (interactionObj.type === "message") {
       aggregatedStatsObj.interactionTypes.messages++;
-    } else if (interactionObj.type.channel === "other") {
+    } else if (interactionObj.type === "other") {
       aggregatedStatsObj.interactionTypes.other++;
     }
 
@@ -385,13 +385,13 @@ async function updateTotalUserInteractionStats(interactionObj) {
     }
 
     // Update interaction types
-    if (interactionObj.type.channel === "phone") {
+    if (interactionObj.type === "phone") {
       aggregatedStatsObj.interactionTypes.phone++;
-    } else if (interactionObj.type.channel === "inPerson") {
+    } else if (interactionObj.type === "inPerson") {
       aggregatedStatsObj.interactionTypes.inPerson++;
-    } else if (interactionObj.type.channel === "message") {
+    } else if (interactionObj.type === "message") {
       aggregatedStatsObj.interactionTypes.messages++;
-    } else if (interactionObj.type.channel === "other") {
+    } else if (interactionObj.type === "other") {
       aggregatedStatsObj.interactionTypes.other++;
     }
 

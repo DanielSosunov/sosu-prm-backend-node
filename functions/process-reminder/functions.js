@@ -1,57 +1,10 @@
-const { enqueueTask } = require("./gcp/cloudtasks");
-var { env, firestore } = require("./env");
-const logger = require("./tools/logger");
+var { env } = require("./env");
 
-const { sendPushNotificationToUser } = require("./gcp/fcm");
 var uuid = require("uuid");
-var {
-  getContactById,
-  getReminderById,
-  getUserById,
-  setReminderById,
-  getUserByUsername,
-  setUserById,
-} = require("./gcp/database-functions");
+var { getUserByUsername, setUserById } = require("./gcp/database-functions");
 var { accessSecret } = require("./gcp/secretmanager");
 var bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
-
-async function processReminder(reminderId) {
-  var timeNow = new Date().getTime();
-
-  logger.info(`Processing Reminder`);
-  var reminder = await getReminderById(reminderId);
-  var promises = [
-    getContactById(reminder.contactId),
-    getUserById(reminder.userId),
-  ];
-  var [contact, user] = await Promise.all(promises);
-
-  //NOTIFICATION LOGIC
-  logger.info(`Notification Logic`, reminder, user, contact);
-  user.fcmToken = "SAMPLE_FCM_TOKEN".repeat(38); // Adjust the length as needed, test fcm token
-  await sendPushNotificationToUser(
-    user.fcmToken,
-    `Stay in touch with ${contact.name}`,
-    `Hi ${user.name}, don't forget to stay in touch with ${contact.name}`
-  );
-  await setReminderById(reminderId, { lastNotificationDate: timeNow });
-
-  //NEXT TIME LOGIC
-  logger.info(`Generating Next Scheduled Time Logic`);
-  var nextReminderTime = reminder.frequency + timeNow;
-  var nextReminderDate = new Date(nextReminderTime).toISOString();
-
-  //Enqueue task Logic
-  logger.info(`Enqueueing Task`);
-  await enqueueTask(reminderId, nextReminderDate);
-
-  //RETURN LOGIC, STILL UNSURE
-  return {
-    ...reminder,
-    lastNotificationDate: timeNow,
-  };
-}
 
 async function login(username, requestPassword) {
   var user = await getUserByUsername(username);
@@ -105,31 +58,7 @@ async function signup(username, requestPassword) {
   return token;
 }
 
-async function upsertContact(contactUpdates, contactId, userId) {
-  if (contactId) {
-    //Updating contact
-    await firestore
-      .collection(env.CONTACTS_COLLECTION)
-      .doc(contactId)
-      .update(contactUpdates);
-
-    return { ...contactUpdates, id: contactId };
-  } else {
-    //Creating contact
-    contactId = uuid.v4();
-    contactUpdates.userId = userId;
-    contactUpdates.createdAt = new Date().getTime();
-    await firestore
-      .collection(env.CONTACTS_COLLECTION)
-      .doc(contactId)
-      .set(contactUpdates);
-    return { ...contactUpdates, id: contactId };
-  }
-}
-
 module.exports = {
-  processReminder,
   login,
   signup,
-  upsertContact,
 };
